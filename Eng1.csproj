@@ -44,8 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionEntity.cs" />
+    <Compile Include="ConnectionObserver.cs" />
+    <Compile Include="ConnectionPair.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schedule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
