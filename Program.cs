@@ -10,7 +10,10 @@ namespace Eng1
     {
         static void Main(string[] args)
         {
-            new ScheduleGenerator();
+            var a = new ScheduleGenerator();
+            a.GenerateSchedule();
+            a.ScheduleParseToJson();
+            a.ScheduleParseFromJson(@"Schedule1.json");
         }
     }
 }

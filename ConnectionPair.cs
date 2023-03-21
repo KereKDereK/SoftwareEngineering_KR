@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,14 @@ namespace Eng1
 {
     public class ConnectionPair
     {
-        public int Id { get; set; }
+        [JsonProperty("firstClient")]
         public string FirstClient { get; set; }
+        [JsonProperty("secondClient")]
         public string SecondClient { get; set; }
-        public List<DateTime> ConnectionWindows { get; set; } 
-        public ConnectionPair(int id, string fclnt, string sclnt, List<DateTime> windows)
+        [JsonProperty("connectionWindows")]
+        public List<Tuple<DateTime, DateTime>> ConnectionWindows { get; set; } 
+        public ConnectionPair(string fclnt, string sclnt, List<Tuple<DateTime, DateTime>> windows)
         {
-            Id = id;
             FirstClient = fclnt;
             SecondClient = sclnt;
             ConnectionWindows = windows;

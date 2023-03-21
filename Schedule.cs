@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Eng1
 {
     public class Schedule
     {
+        [JsonProperty("id")]
         public int Id { get; set; }
+        [JsonProperty("connections")]
         public List<ConnectionPair> ConnectionPairs { get; set; }
+        [JsonProperty("endTime")]
         private DateTime EndTime { get; set; }
-
-        Schedule(int id, string filepath)
+        public Schedule(int id, List<ConnectionPair> pairs, DateTime date)
         {
             Id = id;
-            ScheduleParseFromJson(filepath);
-        }
-        
-        private void ScheduleParseFromJson(string filepath)
-        {
-            //парсим все
+            ConnectionPairs = pairs;
+            EndTime = date;
         }
     }
 }
