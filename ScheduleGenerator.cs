@@ -58,7 +58,7 @@ namespace Eng1
                     var leftdate = GenerateRandomDateTime(StartDate.AddDays(i));
                     var rightdate = leftdate.AddMinutes(5);
                     pairschedule.Add(new Tuple<DateTime, DateTime>(leftdate, rightdate));
-                    endTime = rightdate.Date;
+                    endTime = rightdate.Date.AddDays(1);
                 }
                 connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule));
             }
