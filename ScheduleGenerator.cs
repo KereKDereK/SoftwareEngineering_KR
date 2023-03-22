@@ -25,7 +25,7 @@ namespace Eng1
             {
                 ConnectionPairs = ConnectionPairsParseFromTxt();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Console.WriteLine("[LOG] Schedule generator failed. Check connection pairs file");
             }
@@ -33,7 +33,7 @@ namespace Eng1
         private List<Tuple<string, string>> ConnectionPairsParseFromTxt()
         {
             List<Tuple<string, string>> connectionPairs = new List<Tuple<string, string>>();
-            string[] lines = System.IO.File.ReadAllLines(@"pairs.txt");
+            string[] lines = File.ReadAllLines(@"pairs.txt");
             foreach (string line in lines)
             {
                 string[] subs = line.Split(' ');
@@ -73,10 +73,11 @@ namespace Eng1
             Console.WriteLine("[LOG] Schedule successfully parsed to json file");
         }
 
-        public void ScheduleParseFromJson(string filepath)
+        public Schedule ScheduleParseFromJson(string filepath)
         {
             Schedule = JsonConvert.DeserializeObject<Schedule>(File.ReadAllText(filepath));
             Console.WriteLine("[LOG] Schedule successfully parsed from json file");
+            return Schedule;
         }
     }
 }

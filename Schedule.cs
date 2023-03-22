@@ -14,12 +14,12 @@ namespace Eng1
         [JsonProperty("connections")]
         public List<ConnectionPair> ConnectionPairs { get; set; }
         [JsonProperty("endTime")]
-        private DateTime EndTime { get; set; }
+        public DateTime EndTime { get; set; }
         public Schedule(int id, List<ConnectionPair> pairs, DateTime date)
         {
             Id = id;
             ConnectionPairs = pairs;
-            EndTime = date;
+            EndTime = date; 
         }
     }
 }

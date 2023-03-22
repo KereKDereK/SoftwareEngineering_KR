@@ -28,9 +28,9 @@ namespace Eng1
             try
             {
                 ShouldBeActive = state;
-                return "[LOG] Status of connection (" + Id + ") changed succesfully to " + ShouldBeActive;
+                return "[LOG] Status of connection (" + Id + ") changed successfully to " + ShouldBeActive;
             }
-            catch { return "An error occured."; }
+            catch { return "[ERROR] An error occured while changing connection status."; }
         }
         private void CloseSocket()
         {
