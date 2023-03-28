@@ -10,9 +10,8 @@ namespace Eng1
     {
         static void Main(string[] args)
         {
-            var a = new ScheduleGenerator();
-            a.GenerateSchedule();
-            a.ScheduleParseToJson();
+            var a = new ConnectionObserver();
+            a.ManageConnectionsAsync();
         }
     }
 }

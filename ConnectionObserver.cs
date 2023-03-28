@@ -8,20 +8,22 @@ namespace Eng1
 {
     public class ConnectionObserver
     {
+        public int ConnectionId { get; set; }
         private Schedule CurrentSchedule { get; set; }
         private ScheduleGenerator Generator { get; set; }
         private List<ConnectionEntity> CurrentConnections { get; set; }
 
         public ConnectionObserver()
         {
-            var id = 0;
+            ConnectionId = 0;
             CurrentConnections = new List<ConnectionEntity>();
             Generator = new ScheduleGenerator();
             CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule.json");
             CheckSchedule();
             foreach (ConnectionPair pair in CurrentSchedule.ConnectionPairs)
             {
-                CurrentConnections.Add(new ConnectionEntity(id, true, pair));
+                CurrentConnections.Add(new ConnectionEntity(ConnectionId, true, pair));
+                ++ConnectionId;
             }
         }
         private void CheckSchedule()
@@ -34,9 +36,34 @@ namespace Eng1
                 CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule.json");
             }
         }
-        public async void ManageConnections()
+        public async void ManageConnectionsAsync()
         {
-
+            var connectionFlag = false;
+            while (true)
+            {
+                foreach (ConnectionEntity connection in CurrentConnections)
+                {
+                    connectionFlag = false;
+                    foreach(Tuple<DateTime, DateTime> window in connection.ConnectionPair.ConnectionWindows)
+                    {
+                        if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2)
+                        {
+                            connectionFlag = true;
+                            break;
+                        }
+                    }
+                    if (connectionFlag)
+                    {
+                        connection.ConnectionStatusChange(true);
+                        if (!connection.IsActive)
+                            await Task.FromResult(connection.ActivateConnection());
+                    }
+                    else
+                    {
+                        connection.ConnectionStatusChange(false);
+                    }
+                }
+            }
         }
     }
 }

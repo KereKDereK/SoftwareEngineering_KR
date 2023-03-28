@@ -27,7 +27,7 @@ namespace Eng1
             }
             catch (Exception)
             {
-                Console.WriteLine("[LOG] Schedule generator failed. Check connection pairs file");
+                Console.WriteLine("[ERROR] Schedule generator failed. Check connection pairs file");
             }
         }
         private List<Tuple<string, string>> ConnectionPairsParseFromTxt()
@@ -81,7 +81,7 @@ namespace Eng1
             }
             catch (Exception)
             {
-                Console.WriteLine("[LOG] An error occured. Schedule file does not exist");
+                Console.WriteLine("[ERROR] An error occured. Schedule file does not exist");
                 return new Schedule(new List<ConnectionPair>(), DateTime.MinValue);
             }
             Console.WriteLine("[LOG] Schedule successfully parsed from json file");

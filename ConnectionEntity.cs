@@ -5,13 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Threading;
+using System.Net;
 
 namespace Eng1
 {
     public class ConnectionEntity
     {
         private int Id { get; set; }
-        private ConnectionPair ConnectionPair { get; set; }
+        public ConnectionPair ConnectionPair { get; set; }
+        public bool IsActive { get; set; }
         private Socket FirstClientConnection { get; set; }
         private Socket SecondClientConnection { get; set; }
         private bool ShouldBeActive { get; set; }
@@ -20,7 +22,6 @@ namespace Eng1
             Id = id;
             ShouldBeActive = flag;
             ConnectionPair = connectionPair;
-            ActiveConnection();
         }
         public string ConnectionStatusChange(bool state)
         {
@@ -31,43 +32,88 @@ namespace Eng1
             }
             catch { return "[ERROR] An error occured while changing connection status."; }
         }
-        private void CloseSocket()
+        private void CloseSockets()
         {
             try
             {
                 FirstClientConnection.Shutdown(SocketShutdown.Both);
                 SecondClientConnection.Shutdown(SocketShutdown.Both);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("[ERROR] An error occured while shutting down sockets.");
             }
             finally
             {
-                FirstClientConnection.Close();
-                SecondClientConnection.Close();
+                FirstClientConnection.Dispose();
+                SecondClientConnection.Dispose();
+                IsActive = false;
             }
         }
         private void ConnectionInit()
         {
             if (ShouldBeActive)
             {
-                FirstClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                SecondClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            }
-            else
-            {
-                CloseSocket();
+                try
+                {
+
+                    FirstClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    FirstClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ConnectionPair.FirstClient), 25551 + (Id*2 - 1)));
+                    FirstClientConnection.Listen(1);
+
+                    SecondClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ConnectionPair.SecondClient), 25551 + (Id * 2)));
+                    SecondClientConnection.Listen(1);
+
+                    IsActive = true;
+                }
+                catch(SocketException)
+                {
+                    Console.WriteLine("[ERROR] An error occured while initializing sockets.");
+                }
             }
         }
-        private void ActiveConnection()
+        private string ReceiveData(Socket handler)
+        {
+            byte[] buffer = null;
+            string data = null;
+            while (true)
+            {
+                buffer = new byte[1024];
+                int bytesRec = handler.Receive(buffer);
+                data += Encoding.ASCII.GetString(buffer, 0, bytesRec);
+                if (data.IndexOf("<EOF>") > -1)
+                {
+                    return data;
+                }
+            }
+        }
+        private int SendData(Socket handler, string data)
+        {
+            byte[] msg = Encoding.ASCII.GetBytes(data);
+            handler.Send(msg);
+            return 1;
+        }
+        public async Task ActivateConnection()
         {
             ConnectionInit();
+            Socket handlerFirst = null;
+            Socket handlerSecond = null;
+            if (ShouldBeActive)
+            {
+                Console.WriteLine("[CONNECTION] Waiting for the first client");
+                handlerFirst = FirstClientConnection.Accept();
+                //Console.WriteLine("[CONNECTION] Waiting for the second client");
+                //handlerSecond = SecondClientConnection.Accept();
+            }
             while (ShouldBeActive)
             {
-                Console.WriteLine("[LOG] Connection (" + Id + ") is active");
-                Thread.Sleep(3000);
+                string result = await Task.FromResult(ReceiveData(handlerFirst));
+                var asasdas = await Task.FromResult(SendData(handlerFirst, result));
+                //await Task.FromResult(ReceiveData(handlerSecond));
+                Console.WriteLine("[CONNECTION] Connection (" + Id + ") is active");
             }
+            CloseSockets();
         }
     }
 }
