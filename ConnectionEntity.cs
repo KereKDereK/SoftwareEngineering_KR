@@ -4,23 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Eng1
 {
     public class ConnectionEntity
     {
-        private short Id { get; set; }
-        private string FirstClientIp { get; set; }
+        private int Id { get; set; }
+        private ConnectionPair ConnectionPair { get; set; }
         private Socket FirstClientConnection { get; set; }
-        private string SecondClientIp { get; set; }
         private Socket SecondClientConnection { get; set; }
         private bool ShouldBeActive { get; set; }
-        public ConnectionEntity (short id, bool flag, string firstip, string secondip)
+        public ConnectionEntity (int id, bool flag, ConnectionPair connectionPair)
         {
             Id = id;
             ShouldBeActive = flag;
-            FirstClientIp = firstip;
-            SecondClientIp = secondip;
+            ConnectionPair = connectionPair;
             ActiveConnection();
         }
         public string ConnectionStatusChange(bool state)
@@ -63,13 +62,11 @@ namespace Eng1
         }
         private void ActiveConnection()
         {
-            while (true)
+            ConnectionInit();
+            while (ShouldBeActive)
             {
-                ConnectionInit();
-                while (ShouldBeActive)
-                {
-                    Console.WriteLine("[LOG] Connection (" + Id + ") is active");
-                }
+                Console.WriteLine("[LOG] Connection (" + Id + ") is active");
+                Thread.Sleep(3000);
             }
         }
     }

@@ -13,7 +13,6 @@ namespace Eng1
             var a = new ScheduleGenerator();
             a.GenerateSchedule();
             a.ScheduleParseToJson();
-            a.ScheduleParseFromJson(@"Schedule1.json");
         }
     }
 }

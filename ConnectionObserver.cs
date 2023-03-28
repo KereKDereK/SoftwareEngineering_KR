@@ -14,10 +14,15 @@ namespace Eng1
 
         public ConnectionObserver()
         {
+            var id = 0;
             CurrentConnections = new List<ConnectionEntity>();
             Generator = new ScheduleGenerator();
-            CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule1.json");
+            CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule.json");
             CheckSchedule();
+            foreach (ConnectionPair pair in CurrentSchedule.ConnectionPairs)
+            {
+                CurrentConnections.Add(new ConnectionEntity(id, true, pair));
+            }
         }
         private void CheckSchedule()
         {
@@ -26,10 +31,10 @@ namespace Eng1
                 Console.WriteLine("[LOG] Schedule was outdated. Generating new schedule...");
                 Generator.GenerateSchedule();
                 Generator.ScheduleParseToJson();
-                CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule1.json");
+                CurrentSchedule = Generator.ScheduleParseFromJson(@"Schedule.json");
             }
         }
-        private void ManageConenctions()
+        public async void ManageConnections()
         {
 
         }

@@ -62,12 +62,12 @@ namespace Eng1
                 }
                 connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule));
             }
-            Schedule = new Schedule(1, connectionPairs, endTime);
+            Schedule = new Schedule(connectionPairs, endTime);
             Console.WriteLine("[LOG] Schedule successfully generated");
         }
         public void ScheduleParseToJson()
         {
-            string fileName = "Schedule" + Schedule.Id + ".json";
+            string fileName = "Schedule.json";
             string jsonString = JsonConvert.SerializeObject(Schedule);
             File.WriteAllText(fileName, jsonString);
             Console.WriteLine("[LOG] Schedule successfully parsed to json file");
@@ -75,7 +75,15 @@ namespace Eng1
 
         public Schedule ScheduleParseFromJson(string filepath)
         {
-            Schedule = JsonConvert.DeserializeObject<Schedule>(File.ReadAllText(filepath));
+            try
+            {
+                Schedule = JsonConvert.DeserializeObject<Schedule>(File.ReadAllText(filepath));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("[LOG] An error occured. Schedule file does not exist");
+                return new Schedule(new List<ConnectionPair>(), DateTime.MinValue);
+            }
             Console.WriteLine("[LOG] Schedule successfully parsed from json file");
             return Schedule;
         }

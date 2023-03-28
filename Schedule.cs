@@ -9,15 +9,12 @@ namespace Eng1
 {
     public class Schedule
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
         [JsonProperty("connections")]
         public List<ConnectionPair> ConnectionPairs { get; set; }
         [JsonProperty("endTime")]
         public DateTime EndTime { get; set; }
-        public Schedule(int id, List<ConnectionPair> pairs, DateTime date)
+        public Schedule(List<ConnectionPair> pairs, DateTime date)
         {
-            Id = id;
             ConnectionPairs = pairs;
             EndTime = date; 
         }
