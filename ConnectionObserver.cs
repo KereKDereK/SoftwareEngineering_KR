@@ -38,9 +38,11 @@ namespace Eng1
         }
         public async void ManageConnectionsAsync()
         {
+            var globalFlag = false;
             var connectionFlag = false;
             while (true)
             {
+                globalFlag = false;
                 foreach (ConnectionEntity connection in CurrentConnections)
                 {
                     connectionFlag = false;
@@ -49,6 +51,7 @@ namespace Eng1
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2)
                         {
                             connectionFlag = true;
+                            globalFlag = true;
                             break;
                         }
                     }
@@ -63,6 +66,8 @@ namespace Eng1
                         connection.ConnectionStatusChange(false);
                     }
                 }
+                if (!globalFlag)
+                    Console.WriteLine("[ADAPTER] Imagine that internet adapter is down");
             }
         }
     }
