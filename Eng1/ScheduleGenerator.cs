@@ -75,16 +75,7 @@ namespace Eng1
 
         public Schedule ScheduleParseFromJson(string filepath)
         {
-            try
-            {
-                Schedule = JsonConvert.DeserializeObject<Schedule>(File.ReadAllText(filepath));
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("[ERROR] An error occured. Schedule file does not exist");
-                return new Schedule(new List<ConnectionPair>(), DateTime.MinValue);
-            }
-            Console.WriteLine("[LOG] Schedule successfully parsed from json file");
+            Schedule = Schedule.ParseFromJson(filepath);
             return Schedule;
         }
     }

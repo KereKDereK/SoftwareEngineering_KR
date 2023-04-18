@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Eng1
+namespace Client
 {
     public class ConnectionPair
     {
