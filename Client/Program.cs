@@ -1,6 +1,8 @@
 ﻿using System;
 using System;
+using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
@@ -14,6 +16,15 @@ namespace Client
     {
         public static int Main(String[] args)
         {
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            IPEndPoint localIpEndPoint = s.LocalEndPoint as IPEndPoint;
+
+            if (localIpEndPoint != null)
+            {
+                // Using the LocalEndPoint property.
+                Console.WriteLine("My local IpAddress is " + localIpEndPoint.Address + " connected on port number " + localIpEndPoint.Port);
+            }
             StartClient();
             return 0;
         }

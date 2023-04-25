@@ -10,7 +10,7 @@ namespace Eng1
     public class ConnectionPair
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonProperty("firstClient")]
         public string FirstClient { get; set; }
         [JsonProperty("secondClient")]
