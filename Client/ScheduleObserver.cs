@@ -28,10 +28,11 @@ namespace Client
                 localIP = endPoint.Address.ToString();
             }
             HostIP = localIP;
+            ServerIP = "127.0.0.1";
             Console.WriteLine(HostIP);
         }
 
-        private async void Observe()
+        public async void Observe()
         {
             int serverport = 0;
             while (true)
@@ -42,7 +43,8 @@ namespace Client
                         { 
                             if(HostIP == pair.FirstClient)
                                 serverport = 25551 + (pair.Id * 2 - 1) + 0;
-                            else serverport = 25551 + (pair.Id * 2 - 1) + 1;
+                            else serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
+                            Console.WriteLine(serverport);
                             await CreateConnection(serverport);
                         }
             }

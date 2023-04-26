@@ -30,7 +30,7 @@ namespace Eng1
                 ShouldBeActive = state;
                 return "[LOG] Status of connection (" + Id + ") changed successfully to " + ShouldBeActive;
             }
-            catch { return "[ERROR] An error occured while changing connection status."; }
+            catch { return "[ERROR] An error occured while changing connection status."; Thread.Sleep(1000); }
         }
         private void CloseSockets()
         {
@@ -58,11 +58,11 @@ namespace Eng1
                 {
 
                     FirstClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    FirstClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ConnectionPair.FirstClient), 25551 + (Id*2 - 1)));
+                    FirstClientConnection.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 25551 + (Id*2 - 1)));
                     FirstClientConnection.Listen(1);
 
                     SecondClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ConnectionPair.SecondClient), 25551 + (Id * 2)));
+                    SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 25551 + (Id * 2)));
                     SecondClientConnection.Listen(1);
 
                     IsActive = true;

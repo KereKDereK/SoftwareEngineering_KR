@@ -11,28 +11,11 @@ namespace Client
     class Connection
     {
         private Socket ServerConnection { get; set; }
+        private IPEndPoint RemoteEP { get; set; }
         public bool flag = false;
         public Connection(string ip, int port)
         {
-            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ip), port);
-            try
-            {
-                ServerConnection.Connect(remoteEP);
-            } 
-            catch (SocketException se)
-            {
-                //Console.WriteLine("SocketException : {0}", se.ToString());
-                remoteEP = new IPEndPoint(IPAddress.Parse(ip), port+1);
-                try
-                {
-                    ServerConnection.Connect(remoteEP);
-                }
-                catch
-                {
-                    Console.WriteLine("SocketException : {0}", se.ToString());
-                    flag = true;
-                }
-            }
+            RemoteEP = new IPEndPoint(IPAddress.Parse(ip), port);
         }
 
         private void Send()
@@ -54,6 +37,7 @@ namespace Client
         {
             using (ServerConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                ServerConnection.Connect(RemoteEP);
                 while (ServerConnection.Connected)
                 {
                     Send();
