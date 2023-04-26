@@ -10,8 +10,7 @@ namespace Client
 {
     class Connection
     {
-        private Socket ServerConnection = new Socket(AddressFamily.InterNetwork,
-                    SocketType.Stream, ProtocolType.Tcp);
+        private Socket ServerConnection { get; set; }
         public bool flag = false;
         public Connection(string ip, int port)
         {
@@ -51,13 +50,17 @@ namespace Client
             Console.WriteLine("Echoed test = {0}",
                 Encoding.ASCII.GetString(bytes, 0, bytesRec));
         }
-        public void ObserveConnection()
+        public Task ObserveConnection()
         {
-            while (ServerConnection.Connected)
+            using (ServerConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                Send();
-                Receive();
+                while (ServerConnection.Connected)
+                {
+                    Send();
+                    Receive();
+                }
             }
+            return Task.CompletedTask;
         }
     }
 }
