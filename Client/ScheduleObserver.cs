@@ -54,7 +54,7 @@ namespace Client
             var connection = new Connection(ServerIP, port);
             if (connection.flag)
             {
-                Console.WriteLine("[ERROR] Connection faild");
+                Console.WriteLine("[ERROR] Connection failed");
                 return 1;
             }
             await connection.ObserveConnection();

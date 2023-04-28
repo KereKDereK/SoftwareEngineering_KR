@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Net;
 
 namespace Eng1
 {
@@ -30,24 +30,29 @@ namespace Eng1
                 ShouldBeActive = state;
                 return "[LOG] Status of connection (" + Id + ") changed successfully to " + ShouldBeActive;
             }
-            catch { return "[ERROR] An error occured while changing connection status."; Thread.Sleep(1000); }
+            catch { return "[ERROR] An error occured while changing connection status."; }
         }
-        private void CloseSockets()
+        private static void CloseSocket(Socket socket)
         {
             try
             {
-                FirstClientConnection.Shutdown(SocketShutdown.Both);
-                SecondClientConnection.Shutdown(SocketShutdown.Both);
+                socket.Shutdown(SocketShutdown.Both);
             }
             catch (Exception)
             {
-                Console.WriteLine("[ERROR] An error occured while shutting down sockets.");
+                Console.WriteLine("[ERROR] An error occured while shutting down socket.");
             }
             finally
             {
-                FirstClientConnection.Dispose();
-                SecondClientConnection.Dispose();
-                IsActive = false;
+                socket.Dispose();
+            }
+        }
+        private void CheckConnection(Socket socket)
+        {
+            if (socket.RemoteEndPoint.ToString().Split(':')[0] != ConnectionPair.FirstClient)
+            {
+                Console.WriteLine("[CONNECTION] Invalid ip detected. Closing connection.");
+                // CloseSocket(socket);
             }
         }
         private void ConnectionInit()
@@ -80,7 +85,7 @@ namespace Eng1
             while (true)
             {
                 buffer = new byte[1024];
-                int bytesRec = handler.Receive(buffer);
+                var bytesRec = handler.Receive(buffer);
                 data += Encoding.ASCII.GetString(buffer, 0, bytesRec);
                 if (data.IndexOf("<EOF>") > -1)
                 {
@@ -91,7 +96,7 @@ namespace Eng1
         private int SendData(Socket handler, string data)
         {
             byte[] msg = Encoding.ASCII.GetBytes(data);
-            handler.Send(msg);
+            var a = handler.Send(msg);
             return 1;
         }
         public async Task ActivateConnection()
@@ -102,18 +107,29 @@ namespace Eng1
             if (ShouldBeActive)
             {
                 Console.WriteLine("[CONNECTION] Waiting for the first client");
-                handlerFirst = FirstClientConnection.Accept();
-                //Console.WriteLine("[CONNECTION] Waiting for the second client");
-                //handlerSecond = SecondClientConnection.Accept();
+                handlerFirst = await FirstClientConnection.AcceptAsync();
+                Console.WriteLine("[CONNECTION] First client remote IP is: {0}", handlerFirst.RemoteEndPoint);
+                //CheckConnection(handlerFirst);
+                Console.WriteLine("[CONNECTION] Waiting for the second client");
+                handlerSecond =  await SecondClientConnection.AcceptAsync();
+                Console.WriteLine("[CONNECTION] First client remote IP is: {0}", handlerSecond.RemoteEndPoint);
+                //CheckConnection(handlerSecond);
             }
+            string message;
+            int data;
             while (ShouldBeActive)
             {
-                string result = await Task.FromResult(ReceiveData(handlerFirst));
-                var asasdas = await Task.FromResult(SendData(handlerFirst, result));
-                //await Task.FromResult(ReceiveData(handlerSecond));
+                message = await Task.FromResult(ReceiveData(handlerFirst));
+                data = await Task.FromResult(SendData(handlerSecond, message));
+                message = await Task.FromResult(ReceiveData(handlerSecond));
+                data = await Task.FromResult(SendData(handlerFirst, message));
                 Console.WriteLine("[CONNECTION] Connection (" + Id + ") is active");
             }
-            CloseSockets();
+            CloseSocket(handlerFirst);
+            CloseSocket(handlerSecond);
+            CloseSocket(FirstClientConnection);
+            CloseSocket(SecondClientConnection);
+            IsActive = false;
         }
     }
 }
