@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,10 +11,85 @@ namespace Client
 {
     class Crypto
     {
-        private string key { get; set; } = "abcdefgh";
+        internal static readonly char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
 
-        public string Encrypt(string message)
+        public Dictionary<string, string> ipToKey = new Dictionary<string, string>();
+
+
+        public Crypto(string path, Schedule currentSchedule, string HostIp)
         {
+            int check = ParseKeysFromJson(path);
+            if (check == 1)
+            {
+                GenerateKeyPairs(currentSchedule, HostIp);
+                ParseKeysToJson();
+            }
+        }
+
+        private void GenerateKeyPairs(Schedule currentSchedule, string hostIp)
+        {
+            foreach (ConnectionPair pair in currentSchedule.ConnectionPairs)
+            {
+                if (pair.FirstClient == hostIp)
+                    ipToKey[pair.SecondClient] = GetUniqueKey(8);
+                else
+                    ipToKey[pair.FirstClient] = GetUniqueKey(8);
+                Console.WriteLine("[LOG] Keys successfully generated");
+            }
+        }
+
+        private void ParseKeysToJson()
+        {
+            string fileName = "Keys.json";
+            string jsonString = JsonConvert.SerializeObject(ipToKey);
+            File.WriteAllText(fileName, jsonString);
+            Console.WriteLine("[LOG] Keys successfully parsed to json file");
+        }
+
+        private int ParseKeysFromJson(string path)
+        {
+            Dictionary<string, string> tmpDict = new Dictionary<string, string>();
+            try
+            {
+                tmpDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(path));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("[ERROR] An error occured. Keys file does not exist");
+                return 1;
+            }
+            Console.WriteLine("[LOG] Keys successfully parsed from json file");
+            ipToKey = tmpDict;
+            return 0;
+        }
+
+        public static string GetUniqueKey(int size)
+        {
+            byte[] data = new byte[4 * size];
+            using (var crypto = RandomNumberGenerator.Create())
+            {
+                crypto.GetBytes(data);
+            }
+            StringBuilder result = new StringBuilder(size);
+            for (int i = 0; i < size; i++)
+            {
+                var rnd = BitConverter.ToUInt32(data, i * 4);
+                var idx = rnd % chars.Length;
+
+                result.Append(chars[idx]);
+            }
+
+            return result.ToString();
+        }
+
+        public static string Encrypt(string message, string key)
+        {
+            if (key.Length != 8)
+            {
+                Console.WriteLine("[ERROR] Wrong key length.");
+                return "[ERROR]";
+            }
+
             // Encode message and password
 
             byte[] messageBytes = ASCIIEncoding.ASCII.GetBytes(message);
@@ -41,7 +117,7 @@ namespace Client
             return encryptedMessage;
         }
 
-        public string Decrypt(string encryptedMessage)
+        public static string Decrypt(string encryptedMessage, string key)
         {
             // Convert encrypted message and password to bytes
             byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);

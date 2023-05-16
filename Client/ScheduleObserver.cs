@@ -12,6 +12,7 @@ namespace Client
     {
         public string PathToSchedule { get; set; }
         public Schedule Schedule { get; set; }  
+        private Crypto Crypt { get; set; }
         private string ServerIP { get; set; }
         private string HostIP { get; set; }
 
@@ -19,6 +20,7 @@ namespace Client
         {
             PathToSchedule = path;
             Schedule = Schedule.ParseFromJson(PathToSchedule);
+            Crypt = new Crypto("", Schedule, HostIP);
             string host = Dns.GetHostName();
             string localIP;
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
@@ -40,18 +42,26 @@ namespace Client
                 foreach (ConnectionPair pair in Schedule.ConnectionPairs)
                     foreach (var window in pair.ConnectionWindows)
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2) 
-                        { 
-                            if(HostIP == pair.FirstClient)
+                        {
+                            string currentKey = "";
+                            if (HostIP == pair.FirstClient)
+                            {
                                 serverport = 25551 + (pair.Id * 2 - 1) + 0;
-                            else serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
+                                currentKey = Crypt.ipToKey[pair.SecondClient];
+                            }
+                            else
+                            {
+                                serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
+                                currentKey = Crypt.ipToKey[pair.FirstClient];
+                            }
                             Console.WriteLine(serverport);
-                            await CreateConnection(serverport);
+                            await CreateConnection(serverport, currentKey);
                         }
             }
         }
-        private async Task<int> CreateConnection(int port) 
+        private async Task<int> CreateConnection(int port, string currentKey) 
         {
-            var connection = new Connection(ServerIP, port);
+            var connection = new Connection(ServerIP, port, currentKey);
             if (connection.flag)
             {
                 Console.WriteLine("[ERROR] Connection failed");

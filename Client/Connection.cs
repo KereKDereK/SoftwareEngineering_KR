@@ -12,10 +12,12 @@ namespace Client
     {
         private Socket ServerConnection { get; set; }
         private IPEndPoint RemoteEP { get; set; }
+        private string key { get; set; }
         public bool flag = false;
-        public Connection(string ip, int port)
+        public Connection(string ip, int port, string currentKey)
         {
             RemoteEP = new IPEndPoint(IPAddress.Parse(ip), port);
+            key = currentKey;
         }
 
         private async Task Send()
@@ -23,6 +25,7 @@ namespace Client
             Console.WriteLine("Input message to send:");
             var input = Console.ReadLine();
             input += " <EOF>";
+            input = Crypto.Encrypt(input, key);
             byte[] msg = Encoding.ASCII.GetBytes(input);
             var bytesSent = ServerConnection.SendAsync(msg, SocketFlags.None);
         }
@@ -30,8 +33,9 @@ namespace Client
         {
             byte[] bytes = new byte[1024];
             int bytesRec = await ServerConnection.ReceiveAsync(bytes, SocketFlags.None);
-            Console.WriteLine("Echoed test = {0}",
-                Encoding.ASCII.GetString(bytes, 0, bytesRec));
+            string msg = Encoding.ASCII.GetString(bytes);
+            msg = Crypto.Decrypt(msg, key);
+            Console.WriteLine("Echoed test = {0}", msg);
         }
         public async Task<Task> ObserveConnection()
         {
