@@ -19,7 +19,7 @@ namespace Eng1
         public ScheduleGenerator()
         {
             StartDate = DateTime.Now.Date;   
-            EndDate = StartDate.AddDays(30);
+            EndDate = StartDate.AddDays(1);
             Gen = new Random();
             try
             {

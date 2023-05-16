@@ -70,7 +70,7 @@ namespace Eng1
                     SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 25551 + (Id * 2)));
                     SecondClientConnection.Listen(1);
 
-                    IsActive = true;
+                      IsActive = true;
                 }
                 catch(SocketException)
                 {
@@ -107,11 +107,14 @@ namespace Eng1
             if (ShouldBeActive)
             {
                 Console.WriteLine("[CONNECTION] Waiting for the first client");
-                handlerFirst = await FirstClientConnection.AcceptAsync();
+                Console.WriteLine("[CONNECTION] Waiting for the second client");
+                var task1 = FirstClientConnection.AcceptAsync();
+                var task2 =  SecondClientConnection.AcceptAsync();
+                await Task.WhenAll(task1, task2);
+                handlerFirst = task1.Result;
+                handlerSecond = task2.Result;
                 Console.WriteLine("[CONNECTION] First client remote IP is: {0}", handlerFirst.RemoteEndPoint);
                 //CheckConnection(handlerFirst);
-                Console.WriteLine("[CONNECTION] Waiting for the second client");
-                handlerSecond =  await SecondClientConnection.AcceptAsync();
                 Console.WriteLine("[CONNECTION] First client remote IP is: {0}", handlerSecond.RemoteEndPoint);
                 //CheckConnection(handlerSecond);
             }

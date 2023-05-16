@@ -23,7 +23,7 @@ namespace Eng1
             CheckSchedule();
             foreach (ConnectionPair pair in CurrentSchedule.ConnectionPairs)
             {
-                CurrentConnections.Add(new ConnectionEntity(ConnectionId, true, pair));
+                CurrentConnections.Add(new ConnectionEntity(ConnectionId, false, pair));
                 ++ConnectionId;
             }
         }
@@ -60,7 +60,7 @@ namespace Eng1
                     {
                         connection.ConnectionStatusChange(true);
                         if (!connection.IsActive)
-                            await Task.FromResult(connection.ActivateConnection());
+                            connection.ActivateConnection();
                     }
                     else
                     {

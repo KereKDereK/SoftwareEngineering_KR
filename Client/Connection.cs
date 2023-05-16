@@ -24,12 +24,12 @@ namespace Client
             var input = Console.ReadLine();
             input += " <EOF>";
             byte[] msg = Encoding.ASCII.GetBytes(input);
-            int bytesSent = ServerConnection.Send(msg, SocketFlags.None);
+            var bytesSent = ServerConnection.SendAsync(msg, SocketFlags.None);
         }
         private async Task Receive()
         {
             byte[] bytes = new byte[1024];
-            int bytesRec = ServerConnection.Receive(bytes, SocketFlags.None);
+            int bytesRec = await ServerConnection.ReceiveAsync(bytes, SocketFlags.None);
             Console.WriteLine("Echoed test = {0}",
                 Encoding.ASCII.GetString(bytes, 0, bytesRec));
         }
