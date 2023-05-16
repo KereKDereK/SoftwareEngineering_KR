@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Eng1
@@ -67,7 +68,10 @@ namespace Eng1
                     }
                 }
                 if (!globalFlag)
+                {
                     Console.WriteLine("[ADAPTER] Imagine that internet adapter is down");
+                    Thread.Sleep(3000);
+                }
             }
         }
     }
