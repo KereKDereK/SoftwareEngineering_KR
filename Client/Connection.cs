@@ -24,15 +24,22 @@ namespace Client
         {
             Console.WriteLine("Input message to send:");
             var input = Console.ReadLine();
-            input += " <EOF>";
             input = Crypto.Encrypt(input, key);
+            input += " <EOF>";
             byte[] msg = Encoding.ASCII.GetBytes(input);
-            var bytesSent = ServerConnection.SendAsync(msg, SocketFlags.None);
+            var bytesSent = ServerConnection.Send(msg, SocketFlags.None);
         }
         private async Task Receive()
         {
             byte[] bytes = new byte[1024];
-            int bytesRec = await ServerConnection.ReceiveAsync(bytes, SocketFlags.None);
+            try
+            {
+                int bytesRec = ServerConnection.Receive(bytes, SocketFlags.None);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine(ex);
+            }
             string msg = Encoding.ASCII.GetString(bytes);
             msg = Crypto.Decrypt(msg, key);
             Console.WriteLine("Echoed test = {0}", msg);
@@ -47,6 +54,7 @@ namespace Client
                     await Send();
                     await Receive();
                 }
+                Console.WriteLine("[LOG] Connection stopped");
             }
             return Task.CompletedTask;
         }

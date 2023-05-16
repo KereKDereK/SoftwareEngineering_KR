@@ -88,8 +88,13 @@ namespace Eng1
                 var bytesRec = handler.Receive(buffer);
                 data += Encoding.ASCII.GetString(buffer, 0, bytesRec);
                 if (data.IndexOf("<EOF>") > -1)
-                {
+                {   
                     return data;
+                }
+                else
+                {
+                    Console.WriteLine("[ERROR] No EOF found.");
+                    return data + " <EOF>";
                 }
             }
         }
@@ -118,14 +123,18 @@ namespace Eng1
                 Console.WriteLine("[CONNECTION] First client remote IP is: {0}", handlerSecond.RemoteEndPoint);
                 //CheckConnection(handlerSecond);
             }
-            string message;
-            int data;
+            string first_message, second_message;
+            int first_data, second_data;
             while (ShouldBeActive)
             {
-                message = await Task.FromResult(ReceiveData(handlerFirst));
-                data = await Task.FromResult(SendData(handlerSecond, message));
-                message = await Task.FromResult(ReceiveData(handlerSecond));
-                data = await Task.FromResult(SendData(handlerFirst, message));
+                var task1 = Task.FromResult(ReceiveData(handlerFirst));
+                var task2 = Task.FromResult(ReceiveData(handlerSecond));
+                await Task.WhenAll(task1, task2);
+                first_message = task1.Result;
+                second_message = task2.Result;
+                var data1 = Task.FromResult(SendData(handlerSecond, first_message));
+                var data2 = Task.FromResult(SendData(handlerFirst, second_message));
+                await Task.WhenAll(data1, data2);
                 Console.WriteLine("[CONNECTION] Connection (" + Id + ") is active");
             }
             CloseSocket(handlerFirst);

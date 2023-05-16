@@ -17,11 +17,12 @@ namespace Eng1
         public string SecondClient { get; set; }
         [JsonProperty("connectionWindows")]
         public List<Tuple<DateTime, DateTime>> ConnectionWindows { get; set; } 
-        public ConnectionPair(string fclnt, string sclnt, List<Tuple<DateTime, DateTime>> windows)
+        public ConnectionPair(string fclnt, string sclnt, List<Tuple<DateTime, DateTime>> windows, int id)
         {
             FirstClient = fclnt;
             SecondClient = sclnt;
             ConnectionWindows = windows;
+            Id = id;
         }
     }
 

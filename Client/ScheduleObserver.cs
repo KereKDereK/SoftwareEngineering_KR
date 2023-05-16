@@ -11,6 +11,7 @@ namespace Client
     public class ScheduleObserver
     {
         public string PathToSchedule { get; set; }
+        Connection currentConnection { get; set; }
         public Schedule Schedule { get; set; }  
         private Crypto Crypt { get; set; }
         private string ServerIP { get; set; }
@@ -46,28 +47,39 @@ namespace Client
                             string currentKey = "";
                             if (HostIP == pair.FirstClient)
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 0;
+                                serverport = 25551 + (pair.Id * 2 - 1) + 1;
                                 currentKey = Crypt.ipToKey[pair.SecondClient];
                             }
                             else
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
+                                serverport = 25551 + (pair.Id * 2 - 1) + 1; // заменить на + 1
                                 currentKey = Crypt.ipToKey[pair.FirstClient];
                             }
                             Console.WriteLine(serverport);
-                            await CreateConnection(serverport, currentKey);
+                            try
+                            {
+                                await CreateConnection(serverport, currentKey);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("[ERROR] An error occured while establishing connection");
+                            }
                         }
             }
         }
         private async Task<int> CreateConnection(int port, string currentKey) 
         {
-            var connection = new Connection(ServerIP, port, currentKey);
-            if (connection.flag)
+            if (currentConnection == null)
+            {
+                currentConnection = new Connection(ServerIP, port, currentKey);
+                return 0;
+            }
+            if (currentConnection.flag)
             {
                 Console.WriteLine("[ERROR] Connection failed");
                 return 1;
             }
-            await connection.ObserveConnection();
+            await currentConnection.ObserveConnection();
             return 0;
         }
     }

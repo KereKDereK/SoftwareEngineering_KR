@@ -16,8 +16,9 @@ namespace Client
     {
         public static int Main(String[] args)
         {
-            var a = new ScheduleObserver(@"C:\Users\kerek\source\repos\Eng1\Eng1\bin\Debug\Schedule.json");
+            var a = new ScheduleObserver("Schedule.json");
             a.Observe();
+            Console.ReadKey();
             return 0;
         }
     }

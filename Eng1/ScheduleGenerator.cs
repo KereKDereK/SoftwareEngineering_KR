@@ -11,6 +11,7 @@ namespace Eng1
     public class ScheduleGenerator
     {
         public List<Tuple<string, string>> ConnectionPairs { get; set; }
+        private int NumOfFutureDates { get; set; } = 1;
         private DateTime StartDate { get; set; }
         private DateTime EndDate { get; set; }
         private Random Gen { get; set; }
@@ -19,7 +20,7 @@ namespace Eng1
         public ScheduleGenerator()
         {
             StartDate = DateTime.Now.Date;   
-            EndDate = StartDate.AddDays(1);
+            EndDate = StartDate.AddDays(NumOfFutureDates);
             Gen = new Random();
             try
             {
@@ -48,19 +49,21 @@ namespace Eng1
         }
         public void GenerateSchedule()
         {
+            int counter = 0;
             var connectionPairs = new List<ConnectionPair>();
             DateTime endTime = new DateTime();
             foreach (Tuple<string, string> pair in ConnectionPairs)
             {
                 var pairschedule = new List<Tuple<DateTime, DateTime>>();
-                for (int i = 0; i < 30; i++)
+                for (int i = 0; i < NumOfFutureDates; i++)
                 {
                     var leftdate = GenerateRandomDateTime(StartDate.AddDays(i));
                     var rightdate = leftdate.AddMinutes(5);
                     pairschedule.Add(new Tuple<DateTime, DateTime>(leftdate, rightdate));
                     endTime = rightdate.Date.AddDays(1);
                 }
-                connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule));
+                connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule, counter));
+                counter++;
             }
             Schedule = new Schedule(connectionPairs, endTime);
             Console.WriteLine("[LOG] Schedule successfully generated");
