@@ -14,6 +14,7 @@ namespace Client
         private IPEndPoint RemoteEP { get; set; }
         private string key { get; set; }
         public bool flag = false;
+        public bool IsActive { get; set; } = false;
         public Connection(string ip, int port, string currentKey)
         {
             RemoteEP = new IPEndPoint(IPAddress.Parse(ip), port);
@@ -49,11 +50,13 @@ namespace Client
             using (ServerConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 ServerConnection.Connect(RemoteEP);
+                IsActive = true;
                 while (ServerConnection.Connected)
                 {
                     await Send();
                     await Receive();
                 }
+                IsActive = false;
                 Console.WriteLine("[LOG] Connection stopped");
             }
             return Task.CompletedTask;

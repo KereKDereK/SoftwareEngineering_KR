@@ -92,8 +92,8 @@ namespace Client
 
             // Encode message and password
 
-            byte[] messageBytes = ASCIIEncoding.ASCII.GetBytes(message);
-            byte[] passwordBytes = ASCIIEncoding.ASCII.GetBytes(key);
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
 
             // Set encryption settings -- Use password for both key and init. vector
             DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
@@ -112,16 +112,25 @@ namespace Client
             memStream.Read(encryptedMessageBytes, 0, encryptedMessageBytes.Length);
 
             // Encode the encrypted message as base64 string
-            string encryptedMessage = Convert.ToBase64String(encryptedMessageBytes);
+            string encryptedMessage = Encoding.UTF8.GetString(encryptedMessageBytes);
 
             return encryptedMessage;
         }
 
         public static string Decrypt(string encryptedMessage, string key)
         {
-            // Convert encrypted message and password to bytes
-            byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
-            byte[] passwordBytes = ASCIIEncoding.ASCII.GetBytes(key);
+            string newmsg = "";
+            for (int i = 0; i < encryptedMessage.Length; i++)
+                if (encryptedMessage[i] != '\0')
+                    newmsg += encryptedMessage[i];
+                else
+                    break;
+            while (newmsg.Length % 8 != 0)
+                newmsg += "=";
+            encryptedMessage = newmsg + '\0';
+            byte[] encryptedMessageBytes = Encoding.UTF8.GetBytes(encryptedMessage);
+            //byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
 
             // Set encryption settings -- Use password for both key and init. vector
             DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
@@ -140,7 +149,7 @@ namespace Client
             memStream.Read(decryptedMessageBytes, 0, decryptedMessageBytes.Length);
 
             // Encode deencrypted binary data to base64 string
-            string message = ASCIIEncoding.ASCII.GetString(decryptedMessageBytes);
+            string message = Encoding.UTF8.GetString(decryptedMessageBytes);
 
             return message;
         }
