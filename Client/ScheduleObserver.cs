@@ -38,26 +38,29 @@ namespace Client
         public async void Observe()
         {
             int serverport = 0;
+            bool flag = false;
             while (true)
             {
                 foreach (ConnectionPair pair in Schedule.ConnectionPairs)
                     foreach (var window in pair.ConnectionWindows)
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2) 
                         {
+                            flag = true;
+                            NetworkAdapterController.EnableAdapter();
                             string currentKey = "";
                             if (HostIP == pair.FirstClient)
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 1;
+                                serverport = 25551 + (pair.Id * 2 - 1) + 0;
                                 currentKey = Crypt.ipToKey[pair.SecondClient];
                             }
                             else
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 1; // заменить на + 1
+                                serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
                                 currentKey = Crypt.ipToKey[pair.FirstClient];
                             }
                             try
                             {
-                                await CreateConnection(serverport, currentKey);
+                                 CreateConnection(serverport, currentKey);
                             }
                             catch (SocketException ex)
                             {
@@ -69,6 +72,10 @@ namespace Client
                                 Console.WriteLine(ex.ToString());
                             }
                         }
+                if (flag == false)
+                    NetworkAdapterController.DisableAdapter();
+                flag = false;
+
             }
         }
         private async Task<int> CreateConnection(int port, string currentKey) 
