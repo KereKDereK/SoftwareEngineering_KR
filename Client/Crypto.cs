@@ -18,7 +18,7 @@ namespace Client
 
         public Crypto(string path, Schedule currentSchedule, string HostIp)
         {
-            int check = ParseKeysFromJson(path);
+            int check = ParseKeysFromJson(path + "Keys.json");
             if (check == 1)
             {
                 GenerateKeyPairs(currentSchedule, HostIp);
@@ -112,23 +112,23 @@ namespace Client
             memStream.Read(encryptedMessageBytes, 0, encryptedMessageBytes.Length);
 
             // Encode the encrypted message as base64 string
-            string encryptedMessage = Encoding.UTF8.GetString(encryptedMessageBytes);
+            string encryptedMessage = Convert.ToBase64String(encryptedMessageBytes);
 
             return encryptedMessage;
         }
 
         public static string Decrypt(string encryptedMessage, string key)
         {
+            encryptedMessage = encryptedMessage.Replace(" <EOF>", String.Empty);
             string newmsg = "";
             for (int i = 0; i < encryptedMessage.Length; i++)
                 if (encryptedMessage[i] != '\0')
                     newmsg += encryptedMessage[i];
                 else
                     break;
-            while (newmsg.Length % 8 != 0)
-                newmsg += "=";
-            encryptedMessage = newmsg + '\0';
-            byte[] encryptedMessageBytes = Encoding.UTF8.GetBytes(encryptedMessage);
+            encryptedMessage = newmsg;
+            //encryptedMessage = newmsg + '\0';
+            byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
             //byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
             byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
 

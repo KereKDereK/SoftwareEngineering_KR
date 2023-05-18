@@ -47,12 +47,12 @@ namespace Client
                             string currentKey = "";
                             if (HostIP == pair.FirstClient)
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 0;
+                                serverport = 25551 + (pair.Id * 2 - 1) + 1;
                                 currentKey = Crypt.ipToKey[pair.SecondClient];
                             }
                             else
                             {
-                                serverport = 25551 + (pair.Id * 2 - 1) + 0; // заменить на + 1
+                                serverport = 25551 + (pair.Id * 2 - 1) + 1; // заменить на + 1
                                 currentKey = Crypt.ipToKey[pair.FirstClient];
                             }
                             try
