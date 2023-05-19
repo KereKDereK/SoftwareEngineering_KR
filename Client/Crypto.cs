@@ -90,28 +90,30 @@ namespace Client
                 return "[ERROR]";
             }
 
-            // Encode message and password
-
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
 
-            // Set encryption settings -- Use password for both key and init. vector
-            DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-            ICryptoTransform transform = provider.CreateEncryptor(passwordBytes, passwordBytes);
-            CryptoStreamMode mode = CryptoStreamMode.Write;
-
-            // Set up streams and encrypt
             MemoryStream memStream = new MemoryStream();
-            CryptoStream cryptoStream = new CryptoStream(memStream, transform, mode);
-            cryptoStream.Write(messageBytes, 0, messageBytes.Length);
-            cryptoStream.FlushFinalBlock();
+            try
+            {
+                DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
+                ICryptoTransform transform = provider.CreateEncryptor(passwordBytes, passwordBytes);
+                CryptoStreamMode mode = CryptoStreamMode.Write;
 
-            // Read the encrypted message from the memory stream
+                CryptoStream cryptoStream = new CryptoStream(memStream, transform, mode);
+                cryptoStream.Write(messageBytes, 0, messageBytes.Length);
+                cryptoStream.FlushFinalBlock();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR] An error occured while encrypting the message. Please check your keys file.");
+
+            }
+
             byte[] encryptedMessageBytes = new byte[memStream.Length];
             memStream.Position = 0;
             memStream.Read(encryptedMessageBytes, 0, encryptedMessageBytes.Length);
 
-            // Encode the encrypted message as base64 string
             string encryptedMessage = Convert.ToBase64String(encryptedMessageBytes);
 
             return encryptedMessage;
@@ -119,6 +121,12 @@ namespace Client
 
         public static string Decrypt(string encryptedMessage, string key)
         {
+            if (key.Length != 8)
+            {
+                Console.WriteLine("[ERROR] Wrong key length.");
+                return "[ERROR]";
+            }
+
             encryptedMessage = encryptedMessage.Replace(" <EOF>", String.Empty);
             string newmsg = "";
             for (int i = 0; i < encryptedMessage.Length; i++)
@@ -126,29 +134,30 @@ namespace Client
                     newmsg += encryptedMessage[i];
                 else
                     break;
-            encryptedMessage = newmsg;
-            //encryptedMessage = newmsg + '\0';
-            byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
-            //byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
-            byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
-
-            // Set encryption settings -- Use password for both key and init. vector
-            DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
-            ICryptoTransform transform = provider.CreateDecryptor(passwordBytes, passwordBytes);
-            CryptoStreamMode mode = CryptoStreamMode.Write;
-
-            // Set up streams and decrypt
             MemoryStream memStream = new MemoryStream();
-            CryptoStream cryptoStream = new CryptoStream(memStream, transform, mode);
-            cryptoStream.Write(encryptedMessageBytes, 0, encryptedMessageBytes.Length);
-            cryptoStream.FlushFinalBlock();
+            try
+            {
+                encryptedMessage = newmsg;
+                byte[] encryptedMessageBytes = Convert.FromBase64String(encryptedMessage);
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(key);
 
-            // Read decrypted message from memory stream
+                DESCryptoServiceProvider provider = new DESCryptoServiceProvider();
+                ICryptoTransform transform = provider.CreateDecryptor(passwordBytes, passwordBytes);
+                CryptoStreamMode mode = CryptoStreamMode.Write;
+
+                CryptoStream cryptoStream = new CryptoStream(memStream, transform, mode);
+                cryptoStream.Write(encryptedMessageBytes, 0, encryptedMessageBytes.Length);
+                cryptoStream.FlushFinalBlock();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR] An error occured while decrypting the message. Please check your keys file.");
+            }
+
             byte[] decryptedMessageBytes = new byte[memStream.Length];
             memStream.Position = 0;
             memStream.Read(decryptedMessageBytes, 0, decryptedMessageBytes.Length);
 
-            // Encode deencrypted binary data to base64 string
             string message = Encoding.UTF8.GetString(decryptedMessageBytes);
 
             return message;
