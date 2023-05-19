@@ -11,6 +11,8 @@ namespace Client
 {
     class NetworkAdapterController
     {
+
+        public bool IsActive { get; set; }
         private static void runCmdCommand(string cmd)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
@@ -22,16 +24,23 @@ namespace Client
             process.StartInfo = startInfo;
             process.Start();
         }
-        public static void DisableAdapter()
+        public void DisableAdapter()
         {
-            string disableNet = "wmic path win32_networkadapter where PhysicalAdapter=True call disable";
-            runCmdCommand(disableNet);
+            if (IsActive)
+            {
+                string disableNet = "wmic path win32_networkadapter where PhysicalAdapter=True call disable";
+                runCmdCommand(disableNet);
+            }
+            IsActive = false;
         }
-        public static void EnableAdapter()
+        public void EnableAdapter()
         {
-            string enableNet = "wmic path win32_networkadapter where PhysicalAdapter=True call enable";
-            runCmdCommand(enableNet);
+            if (!IsActive)
+            {
+                string enableNet = "wmic path win32_networkadapter where PhysicalAdapter=True call enable";
+                runCmdCommand(enableNet);
+            }
+            IsActive = true;
         }
-
     }
 }

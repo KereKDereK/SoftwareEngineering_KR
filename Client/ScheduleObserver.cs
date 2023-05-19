@@ -12,6 +12,7 @@ namespace Client
     {
         public string PathToSchedule { get; set; }
         Connection currentConnection { get; set; }
+        NetworkAdapterController Adapter { get; set; } = new NetworkAdapterController();
         public Schedule Schedule { get; set; }  
         private Crypto Crypt { get; set; }
         private string ServerIP { get; set; }
@@ -22,7 +23,12 @@ namespace Client
             PathToSchedule = path;
             Schedule = Schedule.ParseFromJson(PathToSchedule);
             Crypt = new Crypto("", Schedule, HostIP);
-            string host = Dns.GetHostName();
+            HostIP = FindHostIp();
+            ServerIP = "127.0.0.1";
+            Console.WriteLine(HostIP);
+        }
+        private string FindHostIp()
+        {
             string localIP;
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
@@ -30,11 +36,8 @@ namespace Client
                 IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                 localIP = endPoint.Address.ToString();
             }
-            HostIP = localIP;
-            ServerIP = "127.0.0.1";
-            Console.WriteLine(HostIP);
+            return localIP;
         }
-
         public async void Observe()
         {
             int serverport = 0;
@@ -46,7 +49,7 @@ namespace Client
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2) 
                         {
                             flag = true;
-                            NetworkAdapterController.EnableAdapter();
+                            Adapter.EnableAdapter();
                             string currentKey = "";
                             if (HostIP == pair.FirstClient)
                             {
@@ -73,7 +76,7 @@ namespace Client
                             }
                         }
                 if (flag == false)
-                    NetworkAdapterController.DisableAdapter();
+                    Adapter.DisableAdapter();
                 flag = false;
 
             }
@@ -90,7 +93,7 @@ namespace Client
                 return 1;
             }
             if (currentConnection.IsActive == false)
-                await currentConnection.ObserveConnection();
+                currentConnection.ObserveConnection();
             return 0;
         }
     }
