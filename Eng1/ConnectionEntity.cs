@@ -150,8 +150,6 @@ namespace Eng1
             }
             CloseSocket(handlerFirst);
             CloseSocket(handlerSecond);
-            CloseSocket(FirstClientConnection);
-            CloseSocket(SecondClientConnection);
             IsActive = false;
         }
     }
