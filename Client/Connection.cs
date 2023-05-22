@@ -21,6 +21,22 @@ namespace Client
             key = currentKey;
         }
 
+        private static void CloseSocket(Socket socket)
+        {
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("[ERROR] An error occured while shutting down socket.");
+            }
+            finally
+            {
+                socket.Dispose();
+            }
+        }
+
         private async Task Send()
         {
             Console.WriteLine("Input message to send:");
@@ -56,6 +72,7 @@ namespace Client
                     await Send();
                     await Receive();
                 }
+                CloseSocket(ServerConnection);
                 IsActive = false;
                 Console.WriteLine("[LOG] Connection stopped");
             }

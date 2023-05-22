@@ -135,7 +135,6 @@ namespace Eng1
             }
             string first_message, second_message;
             int first_data, second_data;
-            //TODO: переделать работу shouldbeactive на независимую от другого потока
             while (ShouldBeActive)
             {
                 CheckConnectionWindow();
