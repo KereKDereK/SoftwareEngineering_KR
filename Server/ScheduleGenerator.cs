@@ -64,7 +64,7 @@ namespace Server
             var connectionPairs = new List<ConnectionPair>();
             var listOfMax = new List<DateTime>();
             DateTime endTime = new DateTime();
-            if (ConnectionPairs == null)
+            if (ConnectionPairs.Count == 0)
             {
                 Console.WriteLine("[LOG] Empty pairs file");
                 return;
