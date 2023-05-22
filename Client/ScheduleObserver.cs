@@ -19,6 +19,7 @@ namespace Client
         private AESDecryptor FileDecryptor { get; set; } = new AESDecryptor();
         private string ServerIP { get; set; }
         private string HostIP { get; set; }
+        private bool AssertionFlag { get; set; } = true;
 
         public ScheduleObserver(string path, string serverIp = "127.0.0.1")
         {
@@ -27,8 +28,12 @@ namespace Client
             string dec = "Schedule.json";
             try
             {
-                if (!File.Exists(PathToSchedule))
-                    FileDecryptor.DecryptShedule(enc, dec);
+                if (!File.Exists(PathToSchedule) && File.Exists(enc))
+                {
+                        FileDecryptor.DecryptShedule(enc, dec);
+                }
+                else if (!File.Exists(PathToSchedule) && !File.Exists(enc))
+                    AssertionFlag = false;
                 Schedule = Schedule.ParseFromJson(PathToSchedule);
             }
             catch(FileNotFoundException ex )
@@ -71,7 +76,7 @@ namespace Client
             bool flag = false;
             while (true)
             {
-                if (Schedule == null)
+                if (AssertionFlag == false || Schedule == null)
                     break;
                 if (!CheckSchedule())
                 {
