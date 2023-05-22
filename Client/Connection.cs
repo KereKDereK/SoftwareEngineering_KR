@@ -15,12 +15,19 @@ namespace Client
         private string key { get; set; }
         public bool flag = false;
         public bool IsActive { get; set; } = false;
+        public bool ShouldBeActive { get; set; }
+        private DateTime EndOfConnection { get; set; } = DateTime.Now;
+
         public Connection(string ip, int port, string currentKey)
         {
             RemoteEP = new IPEndPoint(IPAddress.Parse(ip), port);
             key = currentKey;
+            ShouldBeActive = true;
         }
-
+        public void SetConnectionEnd(DateTime window)
+        {
+            EndOfConnection = window;
+        }
         private static void CloseSocket(Socket socket)
         {
             try
@@ -35,6 +42,12 @@ namespace Client
             {
                 socket.Dispose();
             }
+        }
+
+        private void CheckConnectionWindow()
+        {
+            if (DateTime.Now > EndOfConnection)
+                ShouldBeActive = false;
         }
 
         private async Task Send()
@@ -63,14 +76,16 @@ namespace Client
         }
         public async Task<Task> ObserveConnection()
         {
+            ShouldBeActive = true;
             using (ServerConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 ServerConnection.Connect(RemoteEP);
                 IsActive = true;
-                while (ServerConnection.Connected)
+                while (ShouldBeActive)
                 {
                     await Send();
                     await Receive();
+                    CheckConnectionWindow();
                 }
                 CloseSocket(ServerConnection);
                 IsActive = false;

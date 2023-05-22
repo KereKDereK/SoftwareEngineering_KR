@@ -78,7 +78,8 @@ namespace Client
                             }
                             try
                             {
-                                 CreateConnection(serverport, currentKey);
+                                
+                                CreateConnection(serverport, currentKey, window.Item2);
                             }
                             catch (SocketException ex)
                             {
@@ -97,11 +98,12 @@ namespace Client
             }
             Console.ReadKey();
         }
-        private async Task<int> CreateConnection(int port, string currentKey) 
+        private async Task<int> CreateConnection(int port, string currentKey, DateTime window) 
         {
             if (currentConnection == null)
             {
                 currentConnection = new Connection(ServerIP, port, currentKey);
+                currentConnection.SetConnectionEnd(window);
             }
             if (currentConnection.flag)
             {
