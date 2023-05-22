@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,23 +20,28 @@ namespace Client
         private string ServerIP { get; set; }
         private string HostIP { get; set; }
 
-        public ScheduleObserver(string path)
+        public ScheduleObserver(string path, string serverIp = "127.0.0.1")
         {
             PathToSchedule = path;
             string enc = "Schedule.enc";
             string dec = "Schedule.json";
             try
             {
-                FileDecryptor.DecryptShedule(enc, dec);
+                if (!File.Exists(PathToSchedule))
+                    FileDecryptor.DecryptShedule(enc, dec);
                 Schedule = Schedule.ParseFromJson(PathToSchedule);
+            }
+            catch(FileNotFoundException ex )
+            {
+                Console.WriteLine("[ERROR] Schedule file not found.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[ERROR] An error occured while parsing schedule. Please, check your schedule file");
+                Console.WriteLine("[ERROR] An error occured while parsing schedule. Please, check your schedule file correctness");
             }
             Crypt = new Crypto("", Schedule, HostIP);
             HostIP = FindHostIp();
-            ServerIP = "127.0.0.1";
+            ServerIP = serverIp;
             Console.WriteLine(HostIP);
         }
         private string FindHostIp()
@@ -65,6 +71,8 @@ namespace Client
             bool flag = false;
             while (true)
             {
+                if (Schedule == null)
+                    break;
                 if (!CheckSchedule())
                 {
                     Adapter.DisableAdapter();
