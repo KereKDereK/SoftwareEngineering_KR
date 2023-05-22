@@ -51,6 +51,7 @@ namespace Eng1
         {
             int counter = 0;
             var connectionPairs = new List<ConnectionPair>();
+            var listOfMax = new List<DateTime>();
             DateTime endTime = new DateTime();
             foreach (Tuple<string, string> pair in ConnectionPairs)
             {
@@ -60,11 +61,12 @@ namespace Eng1
                     var leftdate = GenerateRandomDateTime(StartDate.AddDays(i));
                     var rightdate = leftdate.AddMinutes(5);
                     pairschedule.Add(new Tuple<DateTime, DateTime>(leftdate, rightdate));
-                    endTime = rightdate.Date.AddDays(1);
                 }
+                listOfMax.Add(pairschedule.OrderByDescending(x => x.Item2).First().Item2);
                 connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule, counter));
                 counter++;
             }
+            endTime = listOfMax.Max();
             Schedule = new Schedule(connectionPairs, endTime);
             Console.WriteLine("[LOG] Schedule successfully generated");
         }
