@@ -15,8 +15,8 @@ namespace Server
         private DateTime StartDate { get; set; }
         private DateTime EndDate { get; set; }
         private Random Gen { get; set; }
+        private AESEncryptor FileEncryptor { get; set; } = new AESEncryptor();
         private Schedule Schedule { get; set; }
-
         public ScheduleGenerator()
         {
             StartDate = DateTime.Now.Date;   
@@ -34,7 +34,15 @@ namespace Server
         private List<Tuple<string, string>> ConnectionPairsParseFromTxt()
         {
             List<Tuple<string, string>> connectionPairs = new List<Tuple<string, string>>();
-            string[] lines = File.ReadAllLines(@"pairs.txt");
+            string[] lines = null;
+            try
+            {
+                lines = File.ReadAllLines(@"pairs.txt");
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("[ERROR] Connection pairs file not found.");
+            }
             foreach (string line in lines)
             {
                 string[] subs = line.Split(' ');
@@ -53,6 +61,11 @@ namespace Server
             var connectionPairs = new List<ConnectionPair>();
             var listOfMax = new List<DateTime>();
             DateTime endTime = new DateTime();
+            if (ConnectionPairs == null)
+            {
+                Console.WriteLine("[LOG] Empty pairs file");
+                return;
+            }
             foreach (Tuple<string, string> pair in ConnectionPairs)
             {
                 var pairschedule = new List<Tuple<DateTime, DateTime>>();
@@ -74,8 +87,11 @@ namespace Server
         }
         public void GeneratePartialSchedule(ConnectionPair pair, DateTime endTime)
         {
+            string enc = "Schedule" + pair.FirstClient + ".enc";
+            string dec = "Schedule" + pair.FirstClient + ".json";
             Schedule = new Schedule(new List<ConnectionPair>() { pair }, endTime);
             ScheduleParseToJson(pair.FirstClient);
+            FileEncryptor.CryptSchedule(enc, dec);
         }
         public void ScheduleParseToJson(string name = "")
         {

@@ -20,12 +20,12 @@ namespace Server
             using SHA256 sha256 = SHA256.Create();
             return sha256.ComputeHash(Encoding.UTF8.GetBytes(key));
         }
-        public void CryptSchedule()
+        public void CryptSchedule(string pathToEnc = "Schedule.enc", string pathToDec = "Schedule.json", string secret = "sUp375eCr3t", string vector = "vector")
         {
-            string sourceFileName = "Schedule.json"; //файл, который будем шифровать
-            string outputFileName = "Schedule.enc"; //файл, который будет содержать зашифрованные данные
-            string key = "секретный ключ"; //ключ для шифрования
-            string ivSecret = "вектор"; //вектор инициализации
+            string sourceFileName = pathToDec; //файл, который будем шифровать
+            string outputFileName = pathToEnc; //файл, который будет содержать зашифрованные данные
+            string key = secret; //ключ для шифрования
+            string ivSecret = vector; //вектор инициализации
             using Aes aes = Aes.Create();
             aes.IV = GetIV(ivSecret);
             aes.Key = GetKey(key);
@@ -43,7 +43,6 @@ namespace Server
                 len = inStream.Read(bin, 0, tempSize);
                 encStream.Write(bin, 0, len);
                 readTotal = readTotal + len;
-                Console.WriteLine($"{readTotal} байт обработано");
             }
             encStream.Close();
             outStream.Close();

@@ -43,13 +43,12 @@ namespace Client
                 outStream.Write(data, 0, data.Length);
             }
         }
-
-        public void DecryptShedule() 
+        public void DecryptShedule(string pathToEnc = "Schedule.enc", string pathToDec = "Schedule.json", string secret = "sUp375eCr3t", string vector = "vector") 
         {
-            string outputFileName = "Schedule.enc"; //файл, который будет содержать зашифрованные данные
-            string key = "секретный ключ"; //ключ для шифрования
-            string ivSecret = "вектор"; //вектор инициализации
-            DecryptFile(outputFileName, "Schedule.json", GetKey(key), GetIV(ivSecret));
+            string outputFileName = pathToEnc; //файл, который будет содержать зашифрованные данные
+            string key = secret; //ключ для шифрования
+            string ivSecret = vector; //вектор инициализации
+            DecryptFile(outputFileName, pathToDec, GetKey(key), GetIV(ivSecret));
         }
     }
 }

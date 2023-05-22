@@ -15,13 +15,24 @@ namespace Client
         NetworkAdapterController Adapter { get; set; } = new NetworkAdapterController();
         public Schedule Schedule { get; set; }  
         private Crypto Crypt { get; set; }
+        private AESDecryptor FileDecryptor { get; set; } = new AESDecryptor();
         private string ServerIP { get; set; }
         private string HostIP { get; set; }
 
         public ScheduleObserver(string path)
         {
             PathToSchedule = path;
-            Schedule = Schedule.ParseFromJson(PathToSchedule);
+            string enc = "Schedule.enc";
+            string dec = "Schedule.json";
+            try
+            {
+                FileDecryptor.DecryptShedule(enc, dec);
+                Schedule = Schedule.ParseFromJson(PathToSchedule);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR] An error occured while parsing schedule. Please, check your schedule file");
+            }
             Crypt = new Crypto("", Schedule, HostIP);
             HostIP = FindHostIp();
             ServerIP = "127.0.0.1";
