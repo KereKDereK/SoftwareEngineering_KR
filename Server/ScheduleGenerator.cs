@@ -6,20 +6,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Eng1
+namespace Server
 {
     public class ScheduleGenerator
     {
         public List<Tuple<string, string>> ConnectionPairs { get; set; }
+        private int NumOfFutureDates { get; set; } = 1;
         private DateTime StartDate { get; set; }
         private DateTime EndDate { get; set; }
         private Random Gen { get; set; }
+        private AESEncryptor FileEncryptor { get; set; } = new AESEncryptor();
         private Schedule Schedule { get; set; }
-
         public ScheduleGenerator()
         {
             StartDate = DateTime.Now.Date;   
-            EndDate = StartDate.AddDays(30);
+            EndDate = StartDate.AddDays(NumOfFutureDates);
             Gen = new Random();
             try
             {
@@ -33,41 +34,71 @@ namespace Eng1
         private List<Tuple<string, string>> ConnectionPairsParseFromTxt()
         {
             List<Tuple<string, string>> connectionPairs = new List<Tuple<string, string>>();
-            string[] lines = File.ReadAllLines(@"pairs.txt");
-            foreach (string line in lines)
+            string[] lines = null;
+            try
             {
-                string[] subs = line.Split(' ');
-                connectionPairs.Add(Tuple.Create(subs[0], subs[1]));
+                lines = File.ReadAllLines(@"pairs.txt");
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("[ERROR] Connection pairs file not found.");
+            }
+            if (lines != null)
+            {
+                foreach (string line in lines)
+                {
+                    string[] subs = line.Split(' ');
+                    connectionPairs.Add(Tuple.Create(subs[0], subs[1]));
+                }
             }
             Console.WriteLine("[LOG] Schedule generator parsed txt successfully");
             return connectionPairs;
         }
         private DateTime GenerateRandomDateTime(DateTime Day)
         {
-            return Day.AddHours(Gen.Next(12, 18)).AddMinutes(Gen.Next(0, 60)).AddSeconds(Gen.Next(0, 60));
+            return Day.AddHours(Gen.Next(12, 23)).AddMinutes(Gen.Next(0, 60)).AddSeconds(Gen.Next(0, 60));
         }
         public void GenerateSchedule()
         {
+            int counter = 0;
             var connectionPairs = new List<ConnectionPair>();
+            var listOfMax = new List<DateTime>();
             DateTime endTime = new DateTime();
+            if (ConnectionPairs.Count == 0)
+            {
+                Console.WriteLine("[LOG] Empty pairs file");
+                return;
+            }
             foreach (Tuple<string, string> pair in ConnectionPairs)
             {
                 var pairschedule = new List<Tuple<DateTime, DateTime>>();
-                for (int i = 0; i < 30; i++)
+                for (int i = 0; i < NumOfFutureDates; i++)
                 {
                     var leftdate = GenerateRandomDateTime(StartDate.AddDays(i));
-                    var rightdate = leftdate.AddMinutes(5);
+                    var rightdate = leftdate.AddMinutes(20);
                     pairschedule.Add(new Tuple<DateTime, DateTime>(leftdate, rightdate));
-                    endTime = rightdate.Date.AddDays(1);
                 }
-                connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule));
+                listOfMax.Add(pairschedule.OrderByDescending(x => x.Item2).First().Item2);
+                connectionPairs.Add(new ConnectionPair(pair.Item1, pair.Item2, pairschedule, counter));
+                counter++;
             }
+            endTime = listOfMax.Max();
+            foreach (ConnectionPair pair in connectionPairs)
+                GeneratePartialSchedule(pair, endTime);
             Schedule = new Schedule(connectionPairs, endTime);
             Console.WriteLine("[LOG] Schedule successfully generated");
         }
-        public void ScheduleParseToJson()
+        public void GeneratePartialSchedule(ConnectionPair pair, DateTime endTime)
         {
-            string fileName = "Schedule.json";
+            string enc = "Schedule" + pair.FirstClient + ".enc";
+            string dec = "Schedule" + pair.FirstClient + ".json";
+            Schedule = new Schedule(new List<ConnectionPair>() { pair }, endTime);
+            ScheduleParseToJson(pair.FirstClient);
+            FileEncryptor.CryptSchedule(enc, dec);
+        }
+        public void ScheduleParseToJson(string name = "")
+        {
+            string fileName = "Schedule" + name + ".json";
             string jsonString = JsonConvert.SerializeObject(Schedule);
             File.WriteAllText(fileName, jsonString);
             Console.WriteLine("[LOG] Schedule successfully parsed to json file");
@@ -75,16 +106,7 @@ namespace Eng1
 
         public Schedule ScheduleParseFromJson(string filepath)
         {
-            try
-            {
-                Schedule = JsonConvert.DeserializeObject<Schedule>(File.ReadAllText(filepath));
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("[ERROR] An error occured. Schedule file does not exist");
-                return new Schedule(new List<ConnectionPair>(), DateTime.MinValue);
-            }
-            Console.WriteLine("[LOG] Schedule successfully parsed from json file");
+            Schedule = Schedule.ParseFromJson(filepath);
             return Schedule;
         }
     }

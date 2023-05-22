@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Eng1
+namespace Client
 {
     public class ConnectionPair
     {
+        [JsonProperty("id")]
+        public int Id { get; set; }
         [JsonProperty("firstClient")]
         public string FirstClient { get; set; }
         [JsonProperty("secondClient")]

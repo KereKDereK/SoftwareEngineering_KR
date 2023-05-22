@@ -49,6 +49,7 @@
     <Compile Include="ConnectionEntity.cs" />
     <Compile Include="ConnectionObserver.cs" />
     <Compile Include="ConnectionPair.cs" />
+    <Compile Include="NetworkAdapterController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schedule.cs" />
@@ -57,6 +58,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ScheduleClient\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
