@@ -55,7 +55,10 @@ namespace Client
             while (true)
             {
                 if (!CheckSchedule())
+                {
+                    Adapter.DisableAdapter();
                     break;
+                }
                 foreach (ConnectionPair pair in Schedule.ConnectionPairs)
                     foreach (var window in pair.ConnectionWindows)
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2) 
@@ -105,8 +108,19 @@ namespace Client
                 Console.WriteLine("[ERROR] Connection failed");
                 return 1;
             }
-            if (currentConnection.IsActive == false)
-                currentConnection.ObserveConnection();
+            try
+            {
+                if (currentConnection.IsActive == false)
+                    currentConnection.ObserveConnection();
+            }
+            catch(SocketException ex)
+            {
+                Console.WriteLine("[LOG] Server cancelled connection.");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("[LOG] An error occured during connection.");
+            }
             return 0;
         }
     }
