@@ -7,16 +7,17 @@ using System.Diagnostics;
 
 
 
-namespace Client
+namespace Eng1
 {
     class NetworkAdapterController
     {
-
         public bool IsActive { get; set; }
+
         public NetworkAdapterController()
         {
             IsActive = true;
         }
+
         private static void runCmdCommand(string cmd)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();

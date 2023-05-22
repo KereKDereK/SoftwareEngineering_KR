@@ -16,6 +16,7 @@ namespace Eng1
         public bool IsActive { get; set; }
         private Socket FirstClientConnection { get; set; }
         private Socket SecondClientConnection { get; set; }
+        private DateTime EndOfConnection { get; set; } = DateTime.Now;
         private bool ShouldBeActive { get; set; }
         public ConnectionEntity (int id, bool flag, ConnectionPair connectionPair)
         {
@@ -31,6 +32,10 @@ namespace Eng1
                 return "[LOG] Status of connection (" + Id + ") changed successfully to " + ShouldBeActive;
             }
             catch { return "[ERROR] An error occured while changing connection status."; }
+        }
+        public void SetConnectionEnd(DateTime window)
+        {
+            EndOfConnection = window;
         }
         private static void CloseSocket(Socket socket)
         {
@@ -49,11 +54,16 @@ namespace Eng1
         }
         private void CheckConnection(Socket socket)
         {
-            if (socket.RemoteEndPoint.ToString().Split(':')[0] != ConnectionPair.FirstClient)
+            if (socket.RemoteEndPoint.ToString().Split(':')[0] != ConnectionPair.FirstClient && socket.RemoteEndPoint.ToString().Split(':')[0] != ConnectionPair.SecondClient)
             {
                 Console.WriteLine("[CONNECTION] Invalid ip detected. Closing connection.");
                 // CloseSocket(socket);
             }
+        }
+        private void CheckConnectionWindow()
+        {
+            if (DateTime.Now > EndOfConnection)
+                ConnectionStatusChange(false);
         }
         private void ConnectionInit()
         {
@@ -125,8 +135,10 @@ namespace Eng1
             }
             string first_message, second_message;
             int first_data, second_data;
+            //TODO: переделать работу shouldbeactive на независимую от другого потока
             while (ShouldBeActive)
             {
+                CheckConnectionWindow();
                 var task1 = Task.FromResult(ReceiveData(handlerFirst));
                 var task2 = Task.FromResult(ReceiveData(handlerSecond));
                 await Task.WhenAll(task1, task2);

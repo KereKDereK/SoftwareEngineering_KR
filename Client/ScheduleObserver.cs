@@ -38,12 +38,24 @@ namespace Client
             }
             return localIP;
         }
+        private bool CheckSchedule()
+        {
+            if (Schedule.EndTime < DateTime.Now)
+            {
+                Console.WriteLine("[LOG] Schedule was outdated. Contact your system administrator for the new one. Terminating");
+                return false;
+            }
+            else
+                return true;
+        }
         public async void Observe()
         {
             int serverport = 0;
             bool flag = false;
             while (true)
             {
+                if (!CheckSchedule())
+                    break;
                 foreach (ConnectionPair pair in Schedule.ConnectionPairs)
                     foreach (var window in pair.ConnectionWindows)
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2) 
@@ -80,6 +92,7 @@ namespace Client
                 flag = false;
 
             }
+            Console.ReadKey();
         }
         private async Task<int> CreateConnection(int port, string currentKey) 
         {

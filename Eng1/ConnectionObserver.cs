@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace Eng1
         public int ConnectionId { get; set; }
         private Schedule CurrentSchedule { get; set; }
         private ScheduleGenerator Generator { get; set; }
+        private NetworkAdapterController Controller { get; set; } = new NetworkAdapterController();
         private List<ConnectionEntity> CurrentConnections { get; set; }
 
         public ConnectionObserver()
@@ -43,6 +45,7 @@ namespace Eng1
             var connectionFlag = false;
             while (true)
             {
+                CheckSchedule();
                 globalFlag = false;
                 foreach (ConnectionEntity connection in CurrentConnections)
                 {
@@ -51,6 +54,8 @@ namespace Eng1
                     {
                         if (DateTime.Now >= window.Item1 && DateTime.Now <= window.Item2)
                         {
+                            connection.SetConnectionEnd(window.Item2);
+                            Controller.EnableAdapter();
                             connectionFlag = true;
                             globalFlag = true;
                             break;
@@ -62,14 +67,11 @@ namespace Eng1
                         if (!connection.IsActive)
                             connection.ActivateConnection();
                     }
-                    else
-                    {
-                        connection.ConnectionStatusChange(false);
-                    }
                 }
                 if (!globalFlag)
                 {
-                    Console.WriteLine("[ADAPTER] Imagine that internet adapter is down");
+                    Console.WriteLine("[ADAPTER] Internet adapter is down");
+                    Controller.DisableAdapter();
                     Thread.Sleep(3000);
                 }
             }

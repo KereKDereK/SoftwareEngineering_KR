@@ -33,6 +33,6 @@ namespace Eng1
             }
             Console.WriteLine("[LOG] Schedule successfully parsed from json file");
             return scheduleToUpdate;
-        }
+        }    
     }
 }
