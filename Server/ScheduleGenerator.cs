@@ -56,7 +56,7 @@ namespace Server
         }
         private DateTime GenerateRandomDateTime(DateTime Day)
         {
-            return Day.AddHours(Gen.Next(12, 18)).AddMinutes(Gen.Next(0, 60)).AddSeconds(Gen.Next(0, 60));
+            return Day.AddHours(Gen.Next(12, 23)).AddMinutes(Gen.Next(0, 60)).AddSeconds(Gen.Next(0, 60));
         }
         public void GenerateSchedule()
         {
@@ -75,7 +75,7 @@ namespace Server
                 for (int i = 0; i < NumOfFutureDates; i++)
                 {
                     var leftdate = GenerateRandomDateTime(StartDate.AddDays(i));
-                    var rightdate = leftdate.AddMinutes(5);
+                    var rightdate = leftdate.AddMinutes(20);
                     pairschedule.Add(new Tuple<DateTime, DateTime>(leftdate, rightdate));
                 }
                 listOfMax.Add(pairschedule.OrderByDescending(x => x.Item2).First().Item2);
