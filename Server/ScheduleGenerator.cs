@@ -43,10 +43,13 @@ namespace Server
             {
                 Console.WriteLine("[ERROR] Connection pairs file not found.");
             }
-            foreach (string line in lines)
+            if (lines != null)
             {
-                string[] subs = line.Split(' ');
-                connectionPairs.Add(Tuple.Create(subs[0], subs[1]));
+                foreach (string line in lines)
+                {
+                    string[] subs = line.Split(' ');
+                    connectionPairs.Add(Tuple.Create(subs[0], subs[1]));
+                }
             }
             Console.WriteLine("[LOG] Schedule generator parsed txt successfully");
             return connectionPairs;
