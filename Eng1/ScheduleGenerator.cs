@@ -67,12 +67,19 @@ namespace Eng1
                 counter++;
             }
             endTime = listOfMax.Max();
+            foreach (ConnectionPair pair in connectionPairs)
+                GeneratePartialSchedule(pair, endTime);
             Schedule = new Schedule(connectionPairs, endTime);
             Console.WriteLine("[LOG] Schedule successfully generated");
         }
-        public void ScheduleParseToJson()
+        public void GeneratePartialSchedule(ConnectionPair pair, DateTime endTime)
         {
-            string fileName = "Schedule.json";
+            Schedule = new Schedule(new List<ConnectionPair>() { pair }, endTime);
+            ScheduleParseToJson(pair.FirstClient);
+        }
+        public void ScheduleParseToJson(string name = "")
+        {
+            string fileName = "Schedule" + name + ".json";
             string jsonString = JsonConvert.SerializeObject(Schedule);
             File.WriteAllText(fileName, jsonString);
             Console.WriteLine("[LOG] Schedule successfully parsed to json file");
