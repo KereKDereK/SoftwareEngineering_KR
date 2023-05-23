@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.IO;
 
 namespace Server
 {
@@ -65,19 +66,32 @@ namespace Server
             if (DateTime.Now > EndOfConnection)
                 ConnectionStatusChange(false);
         }
+        private string ServerParseFromTxt()
+        {
+            string result = "127.0.0.1";
+            try
+            {
+                result = File.ReadAllText(@"server.txt");
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("[ERROR] Server file not found.");
+            }
+            Console.WriteLine("[LOG] Txt parsed successfully");
+            return result;
+        }
         private void ConnectionInit()
         {
             if (ShouldBeActive)
             {
                 try
                 {
-
                     FirstClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    FirstClientConnection.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 25551 + (Id*2 - 1)));
+                    FirstClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ServerParseFromTxt()), 25551 + (Id*2 - 1)));
                     FirstClientConnection.Listen(1);
 
                     SecondClientConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 25551 + (Id * 2)));
+                    SecondClientConnection.Bind(new IPEndPoint(IPAddress.Parse(ServerParseFromTxt()), 25551 + (Id * 2)));
                     SecondClientConnection.Listen(1);
 
                       IsActive = true;

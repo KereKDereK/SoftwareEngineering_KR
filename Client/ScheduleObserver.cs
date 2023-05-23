@@ -46,8 +46,22 @@ namespace Client
             }
             Crypt = new Crypto("", Schedule, HostIP);
             HostIP = FindHostIp();
-            ServerIP = serverIp;
+            ServerIP = ServerParseFromTxt();
             Console.WriteLine(HostIP);
+        }
+        private string ServerParseFromTxt()
+        {
+            string result = "127.0.0.1";
+            try
+            {
+                result = File.ReadAllText(@"server.txt");
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("[ERROR] Server file not found.");
+            }
+            Console.WriteLine("[LOG] Txt parsed successfully");
+            return result;
         }
         private string FindHostIp()
         {
